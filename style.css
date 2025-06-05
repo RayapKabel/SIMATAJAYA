@@ -1,0 +1,51 @@
+/* Ganti gaya .bpn-hero yang ada */
+.bpn-hero {
+    position: relative;
+    color: white;
+    padding: 80px 0;
+    background: none; /* Hapus latar belakang asli */
+}
+
+/* Tambahkan overlay gradien */
+.bpn-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(0,71,171,0.8), rgba(0,71,171,0.8));
+    z-index: 1;
+}
+
+/* Gaya untuk container slider */
+.background-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+/* Gaya untuk setiap slide */
+.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    animation: backgroundSlideshow 60s linear infinite;
+}
+
+/* Animasi untuk transisi slide */
+@keyframes backgroundSlideshow {
+    0% { opacity: 0; }
+    12.5% { opacity: 1; }
+    25% { opacity: 1; }
+    37.5% { opacity: 0; }
+    100% { opacity: 0; }
+}

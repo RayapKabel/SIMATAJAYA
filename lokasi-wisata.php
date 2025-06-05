@@ -1,0 +1,1143 @@
+<?php
+session_start();
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lokasi Wisata - Semarang</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
+    <!-- Leaflet.Draw CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" crossorigin="anonymous">
+    <style>
+        :root {
+            --bpn-blue: #007dabac;
+            --bpn-yellow: #ffd700;
+        }
+
+        /* Header Styles */
+        .bpn-header {
+            background-color: var(--bpn-blue);
+            color: white;
+            padding: 1rem 0;
+            border-bottom: 4px solid var(--bpn-yellow);
+        }
+        .bpn-logo {
+            height: 60px;
+        }
+
+        /* Navigation Styles */
+        .bpn-nav {
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .bpn-nav-link {
+            color: var(--bpn-blue) !important;
+            font-weight: 500;
+            padding: 0.75rem 1.25rem !important;
+            transition: background-color 0.3s;
+        }
+        .bpn-nav-link:hover {
+            background-color: rgba(0,71,171,0.1);
+        }
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            animation: fadeIn 0.3s ease-in;
+        }
+        .dropdown-item {
+            color: var(--bpn-blue);
+            padding: 0.5rem 1.25rem;
+            transition: background-color 0.3s;
+        }
+        .dropdown-item:hover {
+            background-color: rgba(0,71,171,0.1);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Footer Styles */
+        .bpn-footer {
+            background-color: var(--bpn-blue);
+            color: white;
+            padding: 2.5rem 0;
+        }
+        .bpn-footer a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .bpn-footer a:hover {
+            color: var(--bpn-yellow);
+        }
+
+        /* Button Styles */
+        .login-btn {
+            background-color: var(--bpn-yellow);
+            color: var(--bpn-blue);
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .login-btn:hover {
+            background-color: #ffca28;
+        }
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* Map Styles */
+        #wisataMap {
+            height: 600px;
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .map-container {
+            padding: 2rem;
+            background-color: white;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+        .map-title {
+            color: var(--bpn-blue);
+            margin-bottom: 1.25rem;
+        }
+        .wisata-info {
+            margin-top: 1.25rem;
+        }
+
+        /* Page Hero Styles */
+        .page-hero {
+            background-color: var(--bpn-yellow);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+
+        /* Popup Styles */
+        .leaflet-popup-content img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 0.625rem;
+            border-radius: 5px;
+        }
+        .leaflet-popup-content .google-maps-link {
+            display: inline-flex;
+            align-items: center;
+            margin-top: 0.625rem;
+            color: white;
+            background-color: var(--bpn-blue);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        .leaflet-popup-content .google-maps-link:hover {
+            background-color: #003087;
+        }
+
+        /* Wisata Card Styles */
+        .wisata-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            margin-bottom: 1.25rem;
+        }
+        .wisata-card:hover {
+            transform: translateY(-5px);
+        }
+        .wisata-img {
+            height: 200px;
+            object-fit: cover;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .place-icon {
+            color: var(--bpn-yellow);
+            margin-right: 0.3125rem;
+        }
+
+        /* Edit Form Styles */
+        .edit-form {
+            width: 250px;
+        }
+        .edit-form .form-control {
+            margin-bottom: 0.625rem;
+            border-color: var(--bpn-blue);
+        }
+        .edit-form .btn-save {
+            background-color: var(--bpn-yellow);
+            color: var(--bpn-blue);
+            border: none;
+        }
+        .edit-form .btn-save:hover {
+            background-color: #ffca28;
+        }
+        .edit-form .btn-cancel {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+        }
+        .edit-form .btn-cancel:hover {
+            background-color: #5a6268;
+        }
+
+        /* Modal Styles */
+        .modal-header {
+            background-color: var(--bpn-blue);
+            color: white;
+            border-bottom: 2px solid var(--bpn-yellow);
+        }
+        .modal-title {
+            font-weight: bold;
+        }
+        .modal-body .form-control {
+            border-color: var(--bpn-blue);
+        }
+        .modal-body .btn-warning {
+            background-color: var(--bpn-yellow);
+            color: var(--bpn-blue);
+            border: none;
+        }
+        .modal-body .btn-warning:hover {
+            background-color: #ffca28;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 70%; /* Adjusted for label above input */
+            transform: translateY(-50%);
+            cursor: pointer;
+            z-index: 1000;
+        }
+        .input-group {
+            position: relative;
+        }
+        .input-group .form-label {
+            width: 100%;
+        }
+        .input-group .form-control {
+            padding-right: 40px; /* Space for toggle icon */
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            #wisataMap {
+                height: 400px;
+            }
+            .bpn-header {
+                padding: 0.75rem 0;
+            }
+            .bpn-logo {
+                height: 50px;
+            }
+            .page-hero h2 {
+                font-size: 2rem;
+            }
+            .map-container {
+                padding: 1rem;
+            }
+            .wisata-img {
+                height: 150px;
+            }
+            .edit-form {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bpn-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center">
+                        <img src="images/logo1.png" alt="Logo SIMATA" class="bpn-logo me-3">
+                        <div>
+                            <h1 class="mb-0">SIMATA</h1>
+                            <p class="mb-0">Sistem Informasi Pariwisata</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <a href="#" class="btn btn-sm login-btn me-2" data-bs-toggle="modal" data-bs-target="#loginModal"><i class="fas fa-user me-1"></i> Login</a>
+                    <a href="#" class="btn btn-sm logout-btn me-2 d-none"><i class="fas fa-sign-out-alt me-1"></i> Logout</a>
+                    <a href="#" class="btn btn-sm btn-outline-light"><i class="fas fa-question-circle me-1"></i> Bantuan</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg bpn-nav">
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Buka atau tutup menu navigasi">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link bpn-nav-link" href="index.php"><i class="fas fa-home me-1" aria-hidden="true"></i> Beranda</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link bpn-nav-link dropdown-toggle active" href="#" id="destinasiDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-map-marked-alt me-1" aria-hidden="true"></i> Destinasi
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="destinasiDropdown">
+                            <li><a class="dropdown-item active" href="lokasi-wisata.html"><i class="fas fa-location-dot me-2" aria-hidden="true"></i> Lokasi Wisata</a></li>
+                            <li><a class="dropdown-item" href="dokumentasi.html"><i class="fas fa-camera me-2" aria-hidden="true"></i> Dokumentasi</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link bpn-nav-link dropdown-toggle" href="#" id="akomodasiDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-file-alt me-1" aria-hidden="true"></i> Akomodasi
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="akomodasiDropdown">
+                            <li><a class="dropdown-item" href="lokasi-hotel.html" onclick="tampilkanHotel()"><i class="fas fa-hotel me-2" aria-hidden="true"></i> Hotel</a></li>
+                            <li><a class="dropdown-item" href="lokasi-villa.html" onclick="tampilkanVilla()"><i class="fas fa-home me-2" aria-hidden="true"></i> Villa</a></li>
+                            <li><a class="dropdown-item" href="lokasi-homestay.html" onclick="tampilkanHomestay()"><i class="fas fa-bed me-2" aria-hidden="true"></i> Homestay</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link bpn-nav-link" href="lokasi-kuliner.html"><i class="fas fa-utensils me-2" aria-hidden="true"></i> Kuliner</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link bpn-nav-link active" href="event.html"><i class="fas fa-calendar-alt me-1" aria-hidden="true"></i> Event</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link bpn-nav-link" href="#" data-bs-toggle="modal" data-bs-target="#informasiModal"><i class="fas fa-info-circle me-1" aria-hidden="true" aria-label="Ikon informasi"></i> Informasi</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Hero -->
+    <section class="page-hero">
+        <div class="container text-center">
+            <h2 class="display-4 fw-bold mb-3">LOKASI WISATA SEMARANG</h2>
+            <p class="lead">Temukan destinasi wisata menarik di Kota Semarang</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="map-container">
+            <div id="wisataMap"></div>
+            <div class="wisata-info">
+                <h4 class="map-title">Lokasi Wisata Populer di Semarang</h4>
+                <p>Berikut adalah peta lokasi wisata di Kota Semarang yang dapat Anda kunjungi. Klik pada marker untuk melihat detail lokasi.</p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2" aria-hidden="true"></i> Gunakan tombol zoom untuk memperbesar/memperkecil peta. Klik ikon marker di toolbar untuk menambahkan lokasi wisata baru (hanya untuk pengguna yang sudah login).
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-md-12">
+                <h3 class="text-center mb-4">REKOMENDASI WISATA SEMARANG</h3>
+                <div class="row justify-content-center">
+                    <!-- Wisata Item 1 -->
+                    <div class="col-md-6">
+                        <div class="card wisata-card">
+                            <img src="images/museum.jpg" class="card-img-top wisata-img" alt="Museum Ranggawarsita" onerror="this.src='https://via.placeholder.com/200x150?text=Gambar+Tidak+Tersedia'">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-map-marked-alt place-icon" aria-hidden="true"></i> Museum Ranggawarsita</h5>
+                                <p class="card-text">Museum yang menjelajahi sejarah & budaya Jawa Tengah dengan artefak dan diorama.</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-star" aria-hidden="true"></i> 4.6</span>
+                                    <small class="text-muted"><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Semarang</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Wisata Item 2 -->
+                    <div class="col-md-6">
+                        <div class="card wisata-card">
+                            <img src="images/sam-poo-kong.jpg" class="card-img-top wisata-img" alt="Sam Poo Kong">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-map-marked-alt place-icon" aria-hidden="true"></i> Sam Poo Kong</h5>
+                                <p class="card-text">Kuil bersejarah yang merupakan tempat ibadah dan wisata budaya Tionghoa.</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-star" aria-hidden="true"></i> 4.8</span>
+                                    <small class="text-muted"><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Semarang</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-md-6">
+                <div class="card bpn-card">
+                    <div class="card-body">
+                        <h5><i class="fas fa-info-circle me-2 text-primary" aria-hidden="true"></i> Informasi Wisata</h5>
+                        <p>Temukan berbagai destinasi wisata menarik di Kota Semarang. Peta ini menampilkan lokasi-lokasi wisata populer yang bisa Anda kunjungi.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card bpn-card">
+                    <div class="card-body">
+                        <h5><i class="fas fa-map-marked-alt me-2 text-primary" aria-hidden="true"></i> Panduan Peta</h5>
+                        <ul>
+                            <li>Klik pada marker untuk melihat detail lokasi</li>
+                            <li>Gunakan tombol +/- untuk zoom in dan zoom out</li>
+                            <li>Drag peta untuk melihat area lain</li>
+                            <li>Klik ikon marker di toolbar untuk menambahkan lokasi baru (hanya untuk pengguna yang sudah login)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bpn-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>KONTAK KAMI</h5>
+                    <p><i class="fas fa-map-marker-alt me-2" aria-hidden="true"></i> Jl. Gubernur Mochtar, Tembalang, Semarang 50275</p>
+                    <p><i class="fas fa-phone me-2" aria-hidden="true"></i> 08998639593</p>
+                    <p><i class="fas fa-envelope me-2" aria-hidden="true"></i> info@wisatayuk.go.id</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>TAUTAN CEPAT</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal" aria-label="Lihat Kebijakan Privasi">Kebijakan Privasi</a></li>
+                        <li><a href="#" data-bs-toggle="modal" data-bs-target="#termsModal" aria-label="Lihat Syarat dan Ketentuan">Syarat dan Ketentuan</a></li>
+                        <li><a href="#" data-bs-toggle="modal" data-bs-target="#faqModal" aria-label="Lihat FAQ">FAQ</a></li>
+                        <li><a href="#" data-bs-toggle="modal" data-bs-target="#sitemapModal" aria-label="Lihat Peta Situs">Peta Situs</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>TERHUBUNG</h5>
+                    <a href="#" class="text-white me-2"><i class="fab fa-facebook-f fa-lg" aria-hidden="true"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a>
+                    <a href="https://www.instagram.com/ptrp.jaya/#" class="text-white me-2"><i class="fab fa-instagram fa-lg" aria-hidden="true"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-youtube fa-lg" aria-hidden="true"></i></a>
+                  </div>
+                </div>
+            </div>
+            <hr class="my-4 bg-light">
+            <div class="text-center">
+                <p class="mb-0">© 2025 SIMATA - Sistem Informasi Pariwisata.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal Login -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login ke SIMATA</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="loginEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="loginEmail" required>
+                        </div>
+                        <div class="mb-3 input-group">
+                            <label for="loginPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" required>
+                            <i class="fas fa-eye password-toggle" id="toggleLoginPassword"></i>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">Ingat saya</label>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100">Login</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <p>Belum punya akun? <a href="#" data-bs-toggle="modal" data-bs-target="#registerModal" id="registerLink">Daftar disini</a></p>
+                        <p><a href="#" id="forgotPasswordLink">Lupa password?</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Register -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="registerModalLabel">Daftar Akun SIMATA</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="registerForm">
+                        <div class="mb-3">
+                            <label for="registerName" class="form-label">Nama Lengkap</label>
+                            <input type="text" class="form-control" id="registerName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="registerEmail" required>
+                        </div>
+                        <div class="mb-3 input-group">
+                            <label for="registerPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="registerPassword" required>
+                            <i class="fas fa-eye password-toggle" id="toggleRegisterPassword"></i>
+                        </div>
+                        <div class="mb-3 input-group">
+                            <label for="registerConfirmPassword" class="form-label">Konfirmasi Password</label>
+                            <input type="password" class="form-control" id="registerConfirmPassword" required>
+                            <i class="fas fa-eye password-toggle" id="toggleConfirmPassword"></i>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100">Daftar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Informasi -->
+    <div class="modal fade quick-link-modal" id="informasiModal" tabindex="-1" aria-labelledby="informasiModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="informasiModalLabel">Informasi SIMATA</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup modal informasi"></button>
+                </div>
+                <div class="modal-body">
+                    <p>SIMATA (Sistem Informasi Pariwisata) adalah platform digital untuk menyediakan informasi lengkap seputar pariwisata di Semarang dan sekitarnya. Kami menawarkan berbagai fitur seperti:</p>
+                    <ul>
+                        <li>Pencarian destinasi wisata populer.</li>
+                        <li>Informasi akomodasi mulai dari hotel hingga homestay.</li>
+                        <li>Rekomendasi kuliner khas daerah.</li>
+                        <li>Detail event dan berita terkini seputar pariwisata.</li>
+                    </ul>
+                    <p>Hubungi kami di <a href="mailto:info@wisatayuk.go.id" aria-label="Kirim email ke info@wisatayuk.go.id">info@wisatayuk.go.id</a> untuk pertanyaan lebih lanjut!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Tutup modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Kebijakan Privasi -->
+    <div class="modal fade quick-link-modal" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="privacyModalLabel">Kebijakan Privasi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup modal kebijakan privasi"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Kami di SIMATA menghargai privasi Anda. Kebijakan privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi pribadi Anda.</p>
+                    <ul>
+                        <li><strong>Pengumpulan Data:</strong> Kami mengumpulkan informasi seperti nama, email, dan preferensi pencarian untuk meningkatkan pengalaman pengguna.</li>
+                        <li><strong>Penggunaan Data:</strong> Data digunakan untuk personalisasi konten dan pengiriman informasi wisata.</li>
+                        <li><strong>Keamanan:</strong> Kami menerapkan langkah-langkah keamanan untuk melindungi data Anda dari akses tidak sah.</li>
+                    </ul>
+                    <p>Untuk detail lengkap, hubungi kami di <a href="mailto:info@wisatayuk.go.id" aria-label="Kirim email ke info@wisatayuk.go.id">info@wisatayuk.go.id</a>.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Tutup modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Syarat dan Ketentuan -->
+    <div class="modal fade quick-link-modal" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="termsModalLabel">Syarat dan Ketentuan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup modal syarat dan ketentuan"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Dengan menggunakan SIMATA, Anda setuju dengan syarat dan ketentuan berikut:</p>
+                    <ul>
+                        <li><strong>Penggunaan Layanan:</strong> Anda harus menggunakan platform ini untuk tujuan yang sah dan sesuai dengan hukum.</li>
+                        <li><strong>Akun Pengguna:</strong> Anda bertanggung jawab atas keamanan akun dan kata sandi Anda.</li>
+                        <li><strong>Konten:</strong> Konten yang diunggah harus sesuai dan tidak melanggar hak pihak ketiga.</li>
+                    </ul>
+                    <p>Untuk informasi lebih lanjut, hubungi kami di <a href="mailto:info@wisatayuk.go.id" aria-label="Kirim email ke info@wisatayuk.go.id">info@wisatayuk.go.id</a>.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Tutup modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal FAQ -->
+    <div class="modal fade quick-link-modal" id="faqModal" tabindex="-1" aria-labelledby="faqModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="faqModalLabel">FAQ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup modal FAQ"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>1. Bagaimana cara mendaftar di SIMATA?</h6>
+                    <p>Klik tombol "Daftar" di halaman login, isi formulir pendaftaran, dan verifikasi email Anda.</p>
+                    <h6>2. Apakah saya bisa menambahkan lokasi wisata?</h6>
+                    <p>Ya, pengguna yang sudah login dapat menambahkan lokasi wisata atau hotel melalui fitur peta interaktif.</p>
+                    <h6>3. Bagaimana cara menghubungi dukungan pelanggan?</h6>
+                    <p>Kirim email ke <a href="mailto:info@wisatayuk.go.id" aria-label="Kirim email ke info@wisatayuk.go.id">info@wisatayuk.go.id</a> atau hubungi 08998639593.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Tutup modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Peta Situs -->
+    <div class="modal fade quick-link-modal" id="sitemapModal" tabindex="-1" aria-labelledby="sitemapModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sitemapModalLabel">Peta Situs</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup modal peta situs"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Navigasi cepat ke halaman utama SIMATA:</p>
+                    <ul>
+                        <li><a href="index.php" aria-label="Kembali ke Beranda">Beranda</a></li>
+                        <li><a href="lokasi-wisata.html" aria-label="Lihat Lokasi Wisata">Destinasi - Lokasi Wisata</a></li>
+                        <li><a href="lokasi-hotel.html" aria-label="Lihat Hotel">Akomodasi - Hotel</a></li>
+                        <li><a href="lokasi-kuliner.html" aria-label="Lihat Kuliner">Kuliner</a></a></li>
+                        <li><a href="event.html" aria-label="Lihat Event">Event</a></a>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="btn btn-primary" data-bs-dismiss="modal" aria-label="Close modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
+    <!-- Leaflet.Draw JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js" crossorigin="anonymous"></script>
+    <script>
+        // Global variables
+        let currentUser = JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser')) || null;
+        let map = null;
+        let drawControl = null;
+
+        // Initialize users array if not exists
+        if (!localStorage.getItem('users')) {
+            localStorage.setItem('users', JSON.stringify([]));
+        }
+
+        // Initialize the map
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                // Map center and zoom for Semarang
+                const semarangCenter = [-6.9667, 110.4167];
+                map = L.map('wisataMap').setView(semarangCenter, 13);
+
+                // Add OpenStreetMap tiles
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                // Initialize wisataLocations
+                let wisataLocations = [
+                    {
+                        name: "Museum Ranggawarsita",
+                        location: [-6.9854414, 110.3839054],
+                        description: "Museum yang menjelajahi sejarah & budaya Jawa Tengah dengan berbagai artefak, model, & diorama.",
+                        imageUrl: "images/museum.jpg"
+                    },
+                    {
+                        name: "Sam Poo Kong",
+                        location: [-6.9950701, 110.3987621],
+                        description: "Kuil bersejarah di Semarang yang merupakan tempat ibadah dan wisata budaya Tionghoa.",
+                        imageUrl: "https://images.unsplash.com/photo-1543512214-318c7553f230?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60"
+                    },
+                    {
+                        name: "Kampung Batik Gedong Semarang",
+                        location: [-6.9688821, 110.4318692],
+                        description: "Kawasan wisata batik dengan berbagai galeri dan workshop batik khas Semarang.",
+                        imageUrl: "https://images.unsplash.com/photo-1563170351-82e3c82b0a6a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60"
+                    },
+                    {
+                        name: "Museum Perjuangan Mandala Bhakti",
+                        location: [-6.9848028, 110.408809],
+                        description: "Museum yang menyimpan berbagai koleksi sejarah perjuangan kemerdekaan Indonesia.",
+                        imageUrl: "https://images.unsplash.com/photo-1580130732478-4e339fb33746?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60"
+                    },
+                    {
+                        name: "Tugu Muda Semarang",
+                        location: [-6.9843176, 110.4093244],
+                        description: "Monumen bersejarah yang dibangun untuk memperingati pertempuran lima hari di Semarang.",
+                        imageUrl: "https://images.unsplash.com/photo-1587135991058-8816a5a9e0a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60"
+                    },
+                    {
+                        name: "Lawang Sewu Semarang",
+                        location: [-6.9840907, 110.4108019],
+                        description: "Bangunan bersejarah peninggalan Belanda dengan arsitektur unik dan banyak pintu.",
+                        imageUrl: "https://images.unsplash.com/photo-1596524430615-b46475bff5aa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60"
+                    },
+                    {
+                        name: "Kota Lama Semarang",
+                        location: [-6.9683012, 110.4284367],
+                        description: "Kawasan bersejarah dengan bangunan-bangunan bergaya kolonial Belanda.",
+                        imageUrl: "https://images.unsplash.com/photo-1604514628550-37477afdf4e3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60"
+                    }
+                ];
+
+                // Load saved locations from localStorage
+                const savedLocations = localStorage.getItem('wisataLocations');
+                if (savedLocations) {
+                    wisataLocations = wisataLocations.concat(JSON.parse(savedLocations));
+                }
+
+                // Custom icons with fallback
+                const defaultIconUrl = 'https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-512.png';
+                const wisataIcon = L.icon({
+                    iconUrl: defaultIconUrl,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32],
+                    popupAnchor: [0, -32]
+                });
+                const hoverIcon = L.icon({
+                    iconUrl: defaultIconUrl,
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 40],
+                    popupAnchor: [0, -40]
+                });
+
+                // Create a layer group for markers
+                const markerLayer = L.layerGroup();
+
+                // Function to add marker to map
+                function addMarker(loc) {
+                    const marker = L.marker(loc.location, { icon: wisataIcon, draggable: currentUser ? true : false })
+                        .bindPopup(`
+                            <div>
+                                <img src="${loc.imageUrl || 'https://via.placeholder.com/200x150?text=Gambar+Tidak+Tersedia'}" alt="${loc.name}" onerror="this.src='https://via.placeholder.com/200x150?text=Gambar+Tidak+Tersedia'">
+                                <b>${loc.name}</b><br>${loc.description}
+                                <br><a href="https://www.google.com/maps?q=${loc.location[0]},${loc.location[1]}&query=${encodeURIComponent(loc.name)}" target="_blank" class="google-maps-link"><i class="fas fa-map-marked-alt me-1" aria-hidden="true"></i>Buka di Google Maps</a>
+                                ${currentUser && !['Museum Ranggawarsita', 'Sam Poo Kong'].includes(loc.name) ? `<br><button class="btn btn-danger btn-sm w-100 mt-2 delete-marker" data-id="${loc.name}"><i class="fas fa-trash me-1"></i>Hapus</button>` : ''}
+                            </div>
+                        `)
+                        .addTo(markerLayer);
+                    
+                    // Hover effect
+                    marker.on('mouseover', function() { this.setIcon(hoverIcon); });
+                    marker.on('mouseout', function() { this.setIcon(wisataIcon); });
+                    
+                    // Handle delete button in popup
+                    marker.on('popupopen', function() {
+                        const popup = this.getPopup();
+                        const popupElement = popup.getElement();
+                        if (popupElement) {
+                            const deleteBtn = popupElement.querySelector('.delete-marker');
+                            if (deleteBtn) {
+                                deleteBtn.addEventListener('click', function() {
+                                    if (!currentUser) {
+                                        alert('Silakan login untuk menghapus lokasi wisata!');
+                                        return;
+                                    }
+                                    
+                                    if (confirm('Apakah Anda yakin ingin menghapus lokasi ini?')) {
+                                        // Hapus dari array wisataLocations
+                                        wisataLocations = wisataLocations.filter(l => l.name !== loc.name);
+                                        
+                                        // Simpan perubahan ke localStorage
+                                        const savedLocations = wisataLocations.filter(l => !['Museum Ranggawarsita', 'Sam Poo Kong'].includes(l.name));
+                                        localStorage.setItem('wisataLocations', JSON.stringify(savedLocations));
+                                        
+                                        // Hapus marker dari peta
+                                        markerLayer.removeLayer(marker);
+                                        map.closePopup();
+                                        
+                                        alert('Lokasi wisata berhasil dihapus!');
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    
+                    // Handle drag end untuk update posisi
+                    if (currentUser) {
+                        marker.on('dragend', function(e) {
+                            const newLatLng = e.target.getLatLng();
+                            
+                            // Update lokasi di array wisataLocations
+                            wisataLocations = wisataLocations.map(l => {
+                                if (l.name === loc.name) {
+                                    l.location = [newLatLng.lat, newLatLng.lng];
+                                }
+                                return l;
+                            });
+                            
+                            // Simpan perubahan ke localStorage
+                            const savedLocations = wisataLocations.filter(l => !['Museum Ranggawarsita', 'Sam Poo Kong'].includes(l.name));
+                            localStorage.setItem('wisataLocations', JSON.stringify(savedLocations));
+                        });
+                    }
+                }
+                // Add existing markers
+                wisataLocations.forEach(loc => addMarker(loc));
+                markerLayer.addTo(map);
+
+                // Initialize Leaflet.Draw control
+                const drawnItems = new L.FeatureGroup();
+                map.addLayer(drawnItems);
+
+                drawControl = new L.Control.Draw({
+                    draw: {
+                        marker: {
+                            icon: wisataIcon
+                        },
+                        polyline: false,
+                        polygon: false,
+                        circle: false,
+                        rectangle: false,
+                        circlemarker: false
+                    },
+                    edit: {
+                        featureGroup: drawnItems,
+                        remove: true // Mengaktifkan tombol hapus
+                    }
+                });
+                // Handle delete markers
+                map.on(L.Draw.Event.DELETED, function(e) {
+                    if (!currentUser) {
+                        alert('Silakan login untuk menghapus lokasi wisata!');
+                        return;
+                    }
+
+                    const layers = e.layers;
+                    let deletedCount = 0;
+                    
+                    layers.eachLayer(function(layer) {
+                        // Cari dan hapus lokasi dari array wisataLocations
+                        const latlng = layer.getLatLng();
+                        wisataLocations = wisataLocations.filter(loc => {
+                            return !(loc.location[0] === latlng.lat && loc.location[1] === latlng.lng);
+                        });
+                        
+                        // Simpan perubahan ke localStorage
+                        const savedLocations = wisataLocations.filter(loc => !['Museum Ranggawarsita', 'Sam Poo Kong'].includes(loc.name));
+                        localStorage.setItem('wisataLocations', JSON.stringify(savedLocations));
+                        
+                        deletedCount++;
+                    });
+                    
+                    if (deletedCount > 0) {
+                        alert(`Berhasil menghapus ${deletedCount} lokasi wisata.`);
+                    }
+                });
+
+                // Handle edit markers
+                map.on(L.Draw.Event.EDITED, function(e) {
+                    if (!currentUser) {
+                        alert('Silakan login untuk mengedit lokasi wisata!');
+                        return;
+                    }
+
+                    const layers = e.layers;
+                    let editedCount = 0;
+                    
+                    layers.eachLayer(function(layer) {
+                        const newLatLng = layer.getLatLng();
+                        
+                        // Update lokasi di array wisataLocations
+                        wisataLocations = wisataLocations.map(loc => {
+                            if (loc.location[0] === layer._latlng.lat && loc.location[1] === layer._latlng.lng) {
+                                loc.location = [newLatLng.lat, newLatLng.lng];
+                                editedCount++;
+                            }
+                            return loc;
+                        });
+                    });
+                    
+                    if (editedCount > 0) {
+                        // Simpan perubahan ke localStorage
+                        const savedLocations = wisataLocations.filter(loc => !['Museum Ranggawarsita', 'Sam Poo Kong'].includes(loc.name));
+                        localStorage.setItem('wisataLocations', JSON.stringify(savedLocations));
+                        alert(`Berhasil mengupdate ${editedCount} lokasi wisata.`);
+                    }
+                });
+                // Only add draw control if user is logged in
+                if (currentUser) {
+                    map.addControl(drawControl);
+                }
+
+                // Handle draw start to check login status
+                map.on('draw:drawstart', function(e) {
+                    if (!currentUser) {
+                        alert('Silakan login untuk menambahkan lokasi wisata!');
+                        const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                        loginModal.show();
+                        // Stop drawing
+                        map.fire('draw:drawstop');
+                    }
+                });
+
+                // Handle new marker creation
+                map.on(L.Draw.Event.CREATED, function(e) {
+                    if (!currentUser) {
+                        alert('Silakan login untuk menambahkan lokasi wisata.');
+                        return;
+                    }
+
+                    const layer = e.layer;
+                    const latlng = layer.getLatLng();
+
+                    // Create popup with form
+                    const popupContent = document.createElement('div');
+                    popupContent.className = 'edit-form';
+                    popupContent.innerHTML = `
+                        <input type="text" id="newName" class="form-control" placeholder="Nama Lokasi" required>
+                        <textarea id="newDescription" class="form-control" placeholder="Deskripsi" rows="3" required></textarea>
+                        <input type="url" id="newImageUrl" class="form-control" placeholder="URL Gambar (opsional)">
+                        <button class="btn btn-save mt-2 me-2">Simpan</button>
+                        <button class="btn btn-cancel mt-2">Batal</button>
+                    `;
+
+                    const popup = L.popup()
+                        .setLatLng(latlng)
+                        .setContent(popupContent)
+                        .openOn(map);
+
+                    // Handle Save button
+                    popupContent.querySelector('.btn-save').addEventListener('click', function() {
+                        const name = popupContent.querySelector('#newName').value.trim();
+                        const description = popupContent.querySelector('#newDescription').value.trim();
+                        const imageUrl = popupContent.querySelector('#newImageUrl').value.trim();
+
+                        if (!name || !description) {
+                            alert('Nama dan deskripsi harus diisi!');
+                            return;
+                        }
+
+                        const newLocation = {
+                            name: name,
+                            location: [latlng.lat, latlng.lng],
+                            description: description,
+                            imageUrl: imageUrl || ''
+                        };
+
+                        // Add to wisataLocations and save to localStorage
+                        wisataLocations.push(newLocation);
+                        const savedLocations = wisataLocations.filter(loc => !['Museum Ranggawarsita', 'Sam Poo Kong'].includes(loc.name));
+                        localStorage.setItem('wisataLocations', JSON.stringify(savedLocations));
+
+                        // Add marker to map
+                        addMarker(newLocation);
+
+                        // Close popup and remove temporary marker
+                        map.closePopup();
+                        drawnItems.removeLayer(layer);
+                    });
+
+                    // Handle Cancel button
+                    popupContent.querySelector('.btn-cancel').addEventListener('click', function() {
+                        map.closePopup();
+                        drawnItems.removeLayer(layer);
+                    });
+                });
+
+                // Add layer control
+                const overlayMaps = {
+                    "Lokasi Wisata": markerLayer
+                };
+                L.control.layers(null, overlayMaps, { collapsed: false }).addTo(map);
+            } catch (error) {
+                console.error('Error initializing map:', error);
+                document.getElementById('wisataMap').innerHTML = '<p class="text-danger text-center">Gagal memuat peta. Silakan coba lagi nanti.</p>';
+            }
+        });
+
+        // Fungsi checkLoginStatus
+        function checkLoginStatus() {
+            const loginBtn = document.querySelector('.login-btn');
+            const logoutBtn = document.querySelector('.logout-btn');
+            
+            if (currentUser) {
+                loginBtn.classList.add('d-none');
+                logoutBtn.classList.remove('d-none');
+                // Add draw control if map and drawControl are initialized
+                if (map && drawControl && !map.hasControl(drawControl)) {
+                    map.addControl(drawControl);
+                    // Aktifkan layer editing
+                    if (drawnItems) {
+                        drawnItems.addTo(map);
+                    }
+                }
+                // Set draggable untuk semua marker
+                markerLayer.eachLayer(function(layer) {
+                    if (layer.draggable) {
+                        layer.draggable = true;
+                    }
+                });
+            } else {
+                loginBtn.classList.remove('d-none');
+                logoutBtn.classList.add('d-none');
+                // Remove draw control if present
+                if (map && drawControl && map.hasControl(drawControl)) {
+                    map.removeControl(drawControl);
+                }
+                // Set non-draggable untuk semua marker
+                markerLayer.eachLayer(function(layer) {
+                    if (layer.draggable) {
+                        layer.draggable = false;
+                    }
+                });
+            }
+            
+            // Refresh popup untuk menampilkan/sembunyikan tombol hapus
+            markerLayer.eachLayer(function(layer) {
+                if (layer.isPopupOpen()) {
+                    layer.closePopup();
+                    layer.openPopup();
+                }
+            });
+        }
+
+        // Fungsi togglePasswordVisibility
+        function togglePasswordVisibility(inputId, toggleId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(toggleId);
+            toggleIcon.addEventListener('click', function() {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    toggleIcon.classList.remove('fa-eye');
+                    toggleIcon.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    toggleIcon.classList.remove('fa-eye-slash');
+                    toggleIcon.classList.add('fa-eye');
+                }
+            });
+        }
+
+        // Inisialisasi toggle password
+        togglePasswordVisibility('loginPassword', 'toggleLoginPassword');
+        togglePasswordVisibility('registerPassword', 'toggleRegisterPassword');
+        togglePasswordVisibility('registerConfirmPassword', 'toggleConfirmPassword');
+
+        // Penanganan form login
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            const user = users.find(u => u.email === email && u.password === password);
+            
+            if (!user) {
+                alert('Email atau password salah!');
+                return;
+            }
+            
+            currentUser = user;
+            if (rememberMe) {
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                sessionStorage.removeItem('currentUser');
+            } else {
+                sessionStorage.setItem('currentUser', JSON.stringify(user));
+                localStorage.removeItem('currentUser');
+            }
+            
+            const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+            loginModal.hide();
+            
+            checkLoginStatus();
+        });
+
+        // Penanganan form registration
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                alert('Password dan konfirmasi password tidak cocok!');
+                return;
+            }
+            
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            if (users.find(u => u.email === email)) {
+                alert('Email sudah terdaftar!');
+                return;
+            }
+            
+            users.push({
+                name,
+                email,
+                password,
+                createdAt: new Date().toISOString()
+            });
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            alert('Pendaftaran berhasil! Silakan login.');
+            
+            const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+            registerModal.hide();
+            const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+            loginModal.show();
+        });
+
+        // Handle logout
+        document.querySelector('.logout-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            localStorage.removeItem('currentUser');
+            sessionStorage.removeItem('currentUser');
+            currentUser = null;
+            
+            checkLoginStatus();
+            
+            alert('Anda telah logout!');
+        });
+
+        // Handle forgot password link
+        document.getElementById('forgotPasswordLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Fitur reset password akan segera tersedia!');
+        });
+
+        // Handle registration link
+        document.getElementById('registerLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+            loginModal.hide();
+            const registerModal = new bootstrap.Modal(document.getElementById('registerModal'));
+            registerModal.show();
+        });
+
+        // Check login status on page load
+        window.addEventListener('load', checkLoginStatus);
+    </script>
+</body>
+</html>
