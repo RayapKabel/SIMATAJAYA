@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMATA - Sistem Informasi Pariwisata</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --smt-blue: #007dabac;
+            --smt-yellow: #ffd700;
+        }
+        /* Gaya yang sudah ada tetap dipertahankan */
+        .smt-header {
+            background-color: var(--smt-blue);
+            color: white;
+            padding: 15px 0;
+            border-bottom: 4px solid var(--smt-yellow);
+        }
+        .smt-logo {
+            height: 80px;
+        }
+        .smt-nav {
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .smt-nav-link {
+            color: var(--smt-blue) !important;
+            font-weight: 500;
+            padding: 15px 20px !important;
+        }
+        .smt-hero {
+            position: relative;
+            color: white;
+            padding: 80px 0;
+            overflow: hidden;
+        }
+        .background-slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .background-slider .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            animation: slideShow 32s infinite;
+        }
+        .background-slider .slide:nth-child(1) {
+            animation-delay: 0s;
+        }
+        .background-slider .slide:nth-child(2) {
+            animation-delay: 8s;
+        }
+        .background-slider .slide:nth-child(3) {
+            animation-delay: 16s;
+        }
+        .background-slider .slide:nth-child(4) {
+            animation-delay: 24s;
+        }
+        @keyframes slideShow {
+            0% { opacity: 0; }
+            6.25% { opacity: 1; }
+            25% { opacity: 1; }
+            31.25% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+        .smt-hero .container {
+            position: relative;
+            z-index: 2;
+        }
+        .smt-hero h2, .smt-hero p {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+        .smt-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .smt-card:hover {
+            transform: translateY(-5px);
+        }
+        .smt-card-icon {
+            font-size: 2.5rem;
+            color: var(--smt-blue);
+        }
+        .smt-footer {
+            background-color: var(--smt-blue);
+            color: white;
+            padding: 40px 0;
+        }
+         /* Button Styles */
+        .login-btn {
+            background-color: var(--smt-yellow);
+            color: var(--smt-blue);
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .login-btn:hover {
+            background-color: #ffca28;
+        }
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .dropdown-item {
+            color: var(--smt-blue);
+            padding: 10px 20px;
+        }
+        .dropdown-item:hover {
+            background-color: rgba(0,71,171,0.1);
+        }
+        .dropdown-toggle::after {
+            margin-left: 5px;
+        }
+        .password-toggle {
+            cursor: pointer;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--smt-blue);
+        }
+        .input-group {
+            position: relative;
+        }
+        .search-results {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .search-results h4 {
+            color: var(--smt-blue);
+            margin-bottom: 20px;
+        }
+        .search-results .result-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .search-results .result-item:last-child {
+            border-bottom: none;
+        }
+        .no-results {
+            color: #666;
+            font-style: italic;
+        }
+        /* Gaya untuk bagian Berita & Event */
+        .news-event-section .smt-card {
+            margin-bottom: 20px;
+        }
+        .news-event-section .badge {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        /* Gaya tambahan untuk modal Tautan Cepat */
+        .quick-link-modal .modal-header {
+            background-color: var(--smt-blue);
+            color: white;
+        }
+        .quick-link-modal .modal-title {
+            font-weight: bold;
+        }
+        .quick-link-modal .btn-close {
+            filter: invert(1);
+        }
+        .quick-link-modal .btn-primary {
+            background-color: var(--smt-yellow);
+            color: var(--smt-blue);
+            border: none;
+        }
+        .quick-link-modal .btn-primary:hover {
+            background-color: #ffca2c;
+        }
+        /* Tambahan untuk accessibility di modal login/register */
+        .modal-header {
+            background-color: var(--smt-blue);
+            color: white;
+            border-bottom: 2px solid var(--smt-yellow);
+        }
+        .modal-title {
+            font-weight: bold;
+        }
+        .modal-body .form-control {
+            border-color: var(--smt-blue);
+        }
+        .modal-body .btn-warning {
+            background-color: var(--smt-yellow);
+            color: var(--smt-blue);
+            border: none;
+        }
+        .modal-body .btn-warning:hover {
+            background-color: #ffca28;
+        }
+        .password-toggle {
+            top: 70%; /* Adjusted to align with lokasi-kuliner.html */
+            z-index: 1000;
+        }
+        .input-group .form-label {
+            width: 100%;
+        }
+        .input-group .form-control {
+            padding-right: 40px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="smt-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center">
+                        <img src="images/logo1.png" alt="Logo SIMATA!" class="smt-logo me-3">
+                        <div>
+                            <h1 class="mb-0">SIMATA</h1>
+                            <p class="mb-0">Sistem Informasi Pariwisata</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <a href="#" class="btn btn-sm login-btn me-2" data-bs-toggle="modal" data-bs-target="#loginModal"><i class="fas fa-user me-1" aria-hidden="true"></i> Login</a>
+                    <a href="#" class="btn btn-sm logout-btn me-2 d-none"><i class="fas fa-sign-out-alt me-1" aria-hidden="true"></i> Logout</a>
+                    <a href="#" class="btn btn-sm btn-outline-light"><i class="fas fa-question-circle me-1" aria-hidden="true"></i> Bantuan</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg smt-nav">
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Buka atau tutup menu navigasi">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link smt-nav-link active" href="index.html"><i class="fas fa-home me-1" aria-hidden="true"></i> Beranda</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link smt-nav-link dropdown-toggle" href="#" id="destinasiDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-map-marked-alt me-1" aria-hidden="true"></i> Destinasi
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="destinasiDropdown">
+                            <li><a class="dropdown-item" href="lokasi-wisata.html"><i class="fas fa-location-dot me-2" aria-hidden="true"></i> Lokasi Wisata</a></li>
+                            <li><a class="dropdown-item" href="dokumentasi.html"><i class="fas fa-camera me-2" aria-hidden="true"></i> Dokumentasi</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link smt-nav-link dropdown-toggle" href="#" id="akomodasiDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-file-alt me-1" aria-hidden="true"></i> Akomodasi
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="akomodasiDropdown">
+                            <li><a class="dropdown-item" href="lokasi-hotel.html" onclick="tampilkanHotel()"><i class="fas fa-hotel me-2" aria-hidden="true"></i> Hotel</a></li>
+                            <li><a class="dropdown-item" href="lokasi-villa.html" onclick="tampilkanVilla()"><i class="fas fa-home me-2" aria-hidden="true"></i> Villa</a></li>
+                            <li><a class="dropdown-item" href="lokasi-homestay.html" onclick="tampilkanHomestay()"><i class="fas fa-bed me-2" aria-hidden="true"></i> Homestay</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link smt-nav-link" href="lokasi-kuliner.html"><i class="fas fa-utensils me-2" aria-hidden="true"></i> Kuliner</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link smt-nav-link" href="event.html"><i class="fas fa-calendar-alt me-1" aria-hidden="true"></i> Event</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link smt-nav-link" href="#" data-bs-toggle="modal" data-bs-target="#informasiModal"><i class="fas fa-info-circle me-1" aria-hidden="true" aria-label="Ikon informasi"></i> Informasi</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section dengan slider latar belakang tanpa overlay biru -->
+    <section class="smt-hero">
+        <div class="background-slider">
+            <div class="slide" style="background-image: url('images/bg6.jpeg');"></div>
+            <div class="slide" style="background-image: url('images/bg1.jpeg');"></div>
+            <div class="slide" style="background-image: url('images/bg4.jpeg');"></div>
+            <div class="slide" style="background-image: url('images/bg3.jpeg');"></div>
+        </div>
+        <div class="container text-center">
+            <h2 class="display-4 fw-bold mb-4">INFORMASI PARIWISATA</h2>
+            <p class="lead mb-5">Layanan digital untuk destinasi wisata, destinasi kuliner, dan informasi pariwisata</p>
+            <div class="row g-3 justify-content-center">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <input type="text" class="form-control form-control-lg" id="searchInput" placeholder="Cari destinasi wisata, kuliner, akomodasi, atau event..." aria-label="Cari destinasi atau event">
+                        <button class="btn btn-warning btn-lg" type="button" id="searchButton" aria-label="Tombol pencarian"><i class="fas fa-search me-1" aria-hidden="true"></i> Cari</button>
+                    </div>
+                </div>
+            </div>
+            <div id="searchResults" class="search-results d-none"></div>
+        </div>
+    </section>
+
+    <!-- Bagian Berita & Event -->
+    <section class="py-5 bg-light news-event-section">
+        <div class="container">
+            <h3 class="mb-4">BERITA & EVENT</h3>
+            <div class="row">
+                <!-- Item Berita -->
+                <div class="col-md-6">
+                    <div class="card smt-card">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                <img src="imgev/carnivalnight.jpg" class="img-fluid" alt="Berita Semarang Night Carnival" onerror="this.src='https://via.placeholder.com/200x150?text=Gambar+Tidak+Tersedia'">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <span class="badge bg-primary">Berita</span>
+                                    <h5 class="card-title">Semarang Night Carnival 2025 Segera Digelar</h5>
+                                    <p class="card-text">Parade budaya dengan kostum spektakuler akan berlangsung di Simpang Lima pada 15 Juni 2025.</p>
+                                    <p class="card-text"><small class="text-muted">30 Mei 2025</small></p>
+                                    <a href="event.html" class="btn btn-sm btn-primary">Baca Selengkapnya</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Item Event 1 -->
+                <div class="col-md-6">
+                    <div class="card smt-card">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                <img src="imgev/kotalama.jpeg" class="img-fluid" alt="Festival Kota Lama 2025" onerror="this.src='https://via.placeholder.com/200x150?text=Gambar+Tidak+Tersedia'">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <span class="badge bg-success">Event</span>
+                                    <h5 class="card-title">Festival Kota Lama 2025</h5>
+                                    <p class="card-text">Acara tahunan di Kota Lama akan diadakan pada 25-27 Juni 2025.</p>
+                                    <p class="card-text"><small class="text-muted">29 Mei 2025</small></p>
+                                    <a href="event.html" class="btn btn-sm btn-primary">Lihat Detail</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Item Event 2 -->
+                <div class="col-md-6">
+                    <div class="card smt-card">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                <img src="imgev/kuliner.jpeg" class="img-fluid" alt="Pameran Kuliner Semarang" onerror="this.src='https://via.placeholder.com/200x150?text=Gambar+Tidak+Tersedia'">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <span class="badge bg-success">Event</span>
+                                    <h5 class="card-title">Pameran Kuliner Semarang</h5>
+                                    <p class="card-text">Nikmati kuliner khas Semarang di PRPP pada 10-12 Juni 2025.</p>
+                                    <p class="card-text"><small class="text-muted">28 Mei 2025</small></p>
+                                    <a href="event.html" class="btn btn-sm btn-primary">Lihat Detail</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="smt-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>KONTAK KAMI</h5>
+                    <p><i class="fas fa-map-marker-alt me-2" aria-hidden="true"></i> Jl. Gubernur Mochtar, Tembalang, Semarang 50275</p>
+                    <p><i class="fas fa-phone me-2" aria-hidden="true"></i> 08998639593</p>
+                    <p><i class="fas fa-envelope me-2" aria-hidden="true"></i> info@wisatayuk.go.id</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>TAUTAN CEPAT</h5>
+                    <ul class="list-unstyled">
+                        <li><a class="text-white" data-bs-toggle="modal" data-bs-target="#privacyModal">Kebijakan Privasi</a></li>
+                        <li><a class="text-white" data-bs-toggle="modal" data-bs-target="#termsModal">Syarat dan Ketentuan</a></li>
+                        <li><a class="text-white" data-bs-toggle="modal" data-bs-target="#faqModal">FAQ</a></li>
+                        <li><a class="text-white" data-bs-toggle="modal" data-bs-target="#sitemapModal">Peta Situs</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>TERHUBUNG</h5>
+                    <a href="#" class="text-white me-2"><i class="fab fa-facebook-f fa-lg" aria-hidden="true"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a>
+                    <a href="https://www.instagram.com/ptrp.jaya/#" class="text-white me-2"><i class="fab fa-instagram fa-lg" aria-hidden="true"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-youtube fa-lg" aria-hidden="true"></i></a>
+                    <div class="mt-3">
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4 bg-light">
+            <div class="text-center">
+                <p class="mb-0">© 2025 SIMATA - Sistem Informasi Pariwisata.</p>
+            </div>
+        </div>
+    </footer>
+
+     <!-- Modal Login -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login ke SIMATA</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="loginEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="loginEmail" required>
+                        </div>
+                        <div class="mb-3 input-group">
+                            <label for="loginPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" required>
+                            <i class="fas fa-eye password-toggle" id="toggleLoginPassword"></i>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">Ingat saya</label>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100">Login</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <p>Belum punya akun? <a href="#" data-bs-toggle="modal" data-bs-target="#registerModal" id="registerLink">Daftar disini</a></p>
+                        <p><a href="#" id="forgotPasswordLink">Lupa password?</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Register -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="registerModalLabel">Daftar Akun SIMATA</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="registerForm">
+                        <div class="mb-3">
+                            <label for="registerName" class="form-label">Nama Lengkap</label>
+                            <input type="text" class="form-control" id="registerName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registerEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="registerEmail" required>
+                        </div>
+                        <div class="mb-3 input-group">
+                            <label for="registerPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="registerPassword" required>
+                            <i class="fas fa-eye password-toggle" id="toggleRegisterPassword"></i>
+                        </div>
+                        <div class="mb-3 input-group">
+                            <label for="registerConfirmPassword" class="form-label">Konfirmasi Password</label>
+                            <input type="password" class="form-control" id="registerConfirmPassword" required>
+                            <i class="fas fa-eye password-toggle" id="toggleConfirmPassword"></i>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100">Daftar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Informasi -->
+    <div class="modal fade quick-link-modal" id="informasiModal" tabindex="-1" aria-labelledby="informasiModalLabel" aria-hidden="true">
+         <div class="modal-dialog modal-dialog-centered">
+             <div class="modal-content">
+                 <div class="modal-header">
+                     <h5 class="modal-title" id="informasiModalLabel">Informasi SIMATA</h5>
+                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup modal"></button>
+                 </div>
+                 <div class="modal-body">
+                     <p>SIMATA (Sistem Informasi Pariwisata) adalah platform digital untuk informasi lengkap seputar pariwisata di Semarang dan sekitarnya. Kami menawarkan:</p>
+                     <ul>
+                         <li>Pencarian destinasi wisata populer.</li>
+                         <li>Informasi akomodasi mulai dari hotel hingga homestay.</li>
+                         <li>Rekomendasi kuliner khas daerah.</li>
+                         <li>Detail event dan berita terkini seputar pariwisata.</li>
+                     </ul>
+                     <p>Hubungi kami di <a href="mailto:info@wisatayuk.go.id">info@wisatayuk.go.id</a> untuk pertanyaan lebih lanjut!</p>
+                 </div>
+                 <div class="modal-footer">
+                     <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Tutup modal">Tutup</button>
+                 </div>
+             </div>
+         </div>
+     </div>
+     
+    <!-- Modal Kebijakan Privasi -->
+    <div class="modal fade quick-link-modal" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="privacyModalLabel">Kebijakan Privasi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup modal kebijakan privasi"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Kami di SIMATA berkomitmen untuk melindungi privasi pengguna. Informasi pribadi yang dikumpulkan hanya digunakan untuk meningkatkan pengalaman pengguna dan tidak akan dibagikan tanpa persetujuan.</p>
+                    <p>Untuk detail lebih lanjut, silakan hubungi kami di info@wisatayuk.go.id.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Tutup modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Syarat dan Ketentuan -->
+    <div class="modal fade quick-link-modal" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="termsModalLabel">Syarat dan Ketentuan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup modal syarat dan ketentuan"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Dengan menggunakan SIMATA, Anda setuju untuk mematuhi syarat dan ketentuan kami. Semua konten di situs ini hanya untuk tujuan informasi dan dapat berubah tanpa pemberitahuan.</p>
+                    <p>Harap baca syarat lengkap di situs resmi kami.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Tutup modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal FAQ -->
+    <div class="modal fade quick-link-modal" id="faqModal" tabindex="-1" aria-labelledby="faqModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="faqModalLabel">FAQ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup modal FAQ"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Bagaimana cara memesan akomodasi?</h6>
+                    <p>Gunakan fitur pencarian untuk menemukan hotel, villa, atau homestay, lalu ikuti tautan untuk reservasi.</p>
+                    <h6>Apakah SIMATA menyediakan pemesanan tiket event?</h6>
+                    <p>Belum, tetapi Anda dapat melihat detail lokasi kulinerah di halaman Event.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Tutup modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Peta Situs -->
+    <div class="modal fade quick-link-modal" id="sitemapModal" tabindex="-1" aria-labelledby="sitemapModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sitemapModalLabel">Peta Situs</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup modal peta situs"></button>
+                </div>
+                <div class="modal-body">
+                    <ul>
+                        <li><a href="index.html">Beranda</a></li>
+                        <li><a href="lokasi-wisata.html">Destinasi - Lokasi Wisata</a></li>
+                        <li><a href="dokumentasi.html">Dokumentasi</a></li>
+                        <li><a href="lokasi-hotel.html">Akomodasi - Hotel</a></li>
+                        <li><a href="lokasi-villa.html">Akomodasi - Villa</a></li>
+                        <li><a href="lokasi-homestay.html">Akomodasi - Homestay</a></li>
+                        <li><a href="lokasi-kuliner.html">Kuliner</a></li>
+                        <li><a href="event.html">Event</a></li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Tutup modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Data contoh untuk pencarian
+    const searchData = {
+        destinasi: [
+            { name: "Kota Lama Semarang", category: "Destinasi", description: "Kawasan bersejarah dengan arsitektur kolonial", url: "lokasi-wisata.html" },
+            { name: "Candi Borobudur", category: "Destinasi", description: "Candi Buddha terbesar di dunia", url: "lokasi-wisata.html" },
+            { name: "Pantai Marina", category: "Destinasi", description: "Pantai indah untuk bersantai", url: "lokasi-wisata.html" }
+        ],
+        akomodasi: [
+            { name: "Hotel Santika", category: "Hotel", description: "Hotel bintang 4 di pusat kota", url: "lokasi-hotel.html" },
+            { name: "Villa Puncak", category: "Villa", description: "Villa dengan pemandangan pegunungan", url: "lokasi-villa.html" },
+            { name: "Homestay Buahdi", category: "Homestay", description: "Homestay nyaman dengan nuansa lokal", url: "lokasi-homestay.html" }
+        ],
+        kuliner: [
+            { name: "Warung Makan Lumpia Semarang", category: "Kuliner", description: "Makanan khas Semarang yang lezat", url: "lokasi-kuliner.html" },
+            { name: "Soto Ayam Pak Man", category: "Kuliner", description: "Soto khas dengan kuah gurih", url: "lokasi-kuliner.html" }
+        ],
+        event: [
+            { name: "Semarang Night Carnival 2025", category: "Event", description: "Parade budaya di Simpang Lima", url: "event.html" },
+            { name: "Festival Kota Lama 2025", category: "Event", description: "Acara tahunan di Kota Lama", url: "event.html" },
+            { name: "Pameran Kuliner Semarang", category: "Event", description: "Nikmati kuliner khas Semarang di PRPP", url: "event.html" }
+        ],
+        informasi: [
+            { name: "Panduan Wisata Semarang", category: "Informasi", description: "Informasi lengkap tentang wisata Semarang", url: "#" },
+            { name: "Tips Perjalanan", category: "Informasi", description: "Tips aman dan nyaman berwisata", url: "#" }
+        ]
+    };
+
+    // Global variables
+    let currentUser = JSON.parse(localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser')) || null;
+
+    // Initialize users array if not exists
+    if (!localStorage.getItem('users')) {
+        localStorage.setItem('users', JSON.stringify([]));
+    }
+
+    // Fungsi pencarian
+    function performSearch() {
+        const searchInput = document.getElementById('searchInput').value.toLowerCase();
+        const searchResults = document.getElementById('searchResults');
+        searchResults.innerHTML = '';
+        searchResults.classList.remove('d-none');
+
+        let results = [];
+        
+        // Menggabungkan semua data dari berbagai kategori
+        Object.values(searchData).forEach(category => {
+            category.forEach(item => {
+                if (item.name.toLowerCase().includes(searchInput) || 
+                    item.description.toLowerCase().includes(searchInput)) {
+                    results.push(item);
+                }
+            });
+        });
+
+        // Menampilkan hasil
+        if (results.length === 0) {
+            searchResults.innerHTML = '<p class="text-muted">Tidak ada hasil ditemukan</p>';
+            return;
+        }
+
+        searchResults.innerHTML = '<h4>Hasil Pencarian</h4>';
+        results.forEach(result => {
+            const resultElement = document.createElement('div');
+            resultElement.className = 'result-item';
+            resultElement.innerHTML = `
+                <h6>${result.name} <small>(${result.category})</small></h6>
+                <p>${result.description}</p>
+                <a href="${result.url}" class="btn btn-sm btn-primary">Lihat Detail</a>
+            `;
+            searchResults.appendChild(resultElement);
+        });
+    }
+
+    // Event listener untuk pencarian
+    document.getElementById('searchButton').addEventListener('click', performSearch);
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            performSearch();
+        }
+    });
+
+    // Menyembunyikan hasil pencarian saat klik di luar area
+    document.addEventListener('click', function(e) {
+        const searchContainer = document.querySelector('.smt-hero');
+        if (!searchContainer.contains(e.target)) {
+            document.getElementById('searchResults').classList.add('d-none');
+        }
+    });
+
+    // Fungsi checkLoginStatus
+    function checkLoginStatus() {
+        const loginBtn = document.querySelector('.login-btn');
+        const logoutBtn = document.querySelector('.logout-btn');
+        
+        if (currentUser) {
+            loginBtn.classList.add('d-none');
+            logoutBtn.classList.remove('d-none');
+        } else {
+            loginBtn.classList.remove('d-none');
+            logoutBtn.classList.add('d-none');
+        }
+    }
+
+    // Fungsi togglePasswordVisibility
+    function togglePasswordVisibility(inputId, toggleId) {
+        const passwordInput = document.getElementById(inputId);
+        const toggleIcon = document.getElementById(toggleId);
+        toggleIcon.addEventListener('click', function() {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        });
+    }
+
+    // Inisialisasi toggle password
+    togglePasswordVisibility('loginPassword', 'toggleLoginPassword');
+    togglePasswordVisibility('registerPassword', 'toggleRegisterPassword');
+    togglePasswordVisibility('registerConfirmPassword', 'toggleConfirmPassword');
+
+    // Penanganan form login
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const rememberMe = document.getElementById('rememberMe').checked;
+        
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        const user = users.find(u => u.email === email && u.password === password);
+        
+        if (!user) {
+            alert('Email atau password salah!');
+            return;
+        }
+        
+        currentUser = user;
+        if (rememberMe) {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            sessionStorage.removeItem('currentUser');
+        } else {
+            sessionStorage.setItem('currentUser', JSON.stringify(user));
+            localStorage.removeItem('currentUser');
+        }
+        
+        const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+        loginModal.hide();
+        
+        checkLoginStatus();
+    });
+
+    // Penanganan form registrasi
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('registerName').value.trim();
+        const email = document.getElementById('registerEmail').value.trim();
+        const password = document.getElementById('registerPassword').value;
+        const confirmPassword = document.getElementById('registerConfirmPassword').value;
+        
+        if (password !== confirmPassword) {
+            alert('Password dan konfirmasi password tidak cocok!');
+            return;
+        }
+        
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        if (users.find(u => u.email === email)) {
+            alert('Email sudah terdaftar!');
+            return;
+        }
+        
+        users.push({
+            name,
+            email,
+            password,
+            createdAt: new Date().toISOString()
+        });
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        alert('Pendaftaran berhasil! Silakan login.');
+        
+        const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+        registerModal.hide();
+        const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+        loginModal.show();
+    });
+
+    // Penanganan logout
+    document.querySelector('.logout-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        localStorage.removeItem('currentUser');
+        sessionStorage.removeItem('currentUser');
+        currentUser = null;
+        
+        checkLoginStatus();
+        
+        alert('Anda telah logout!');
+    });
+
+    // Penanganan lupa password
+    document.getElementById('forgotPasswordLink').addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('Fitur reset password akan segera tersedia!');
+    });
+
+    // Penanganan link registrasi
+    document.getElementById('registerLink').addEventListener('click', function(e) {
+        e.preventDefault();
+        const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+        loginModal.hide();
+        const registerModal = new bootstrap.Modal(document.getElementById('registerModal'));
+        registerModal.show();
+    });
+
+    // Cek status login saat halaman dimuat
+    window.addEventListener('load', checkLoginStatus);
+</script>
+</body>
+</html>
